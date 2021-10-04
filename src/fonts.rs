@@ -69,34 +69,33 @@ impl FontHandler {
 
             println!("{}", file.name());
 
-            // let mut outfile = std::fs::File::create(&output_path).unwrap();
+            let mut outfile = std::fs::File::create(&output_path).unwrap();
 
-            // std::io::copy(&mut file, &mut outfile).unwrap();
+            std::io::copy(&mut file, &mut outfile).unwrap();
 
-            // #[cfg(unix)]
-            // {
-            //     if let Some(mode) = file.unix_mode() {
-            //         set_permissions(&output_path, Permissions::from_mode(mode)).unwrap();
-            //     }
-            // }
+            #[cfg(unix)]
+            {
+                if let Some(mode) = file.unix_mode() {
+                    set_permissions(&output_path, Permissions::from_mode(mode)).unwrap();
+                }
+            }
 
-            // if (&*file.name()).ends_with('/') {
-            //     println!("File {} extracted to \"{}\"", i, output_path.display());
-            //     std::fs::create_dir_all(&output_path).unwrap();
-            // } else {
-            //     println!(
-            //         "File {} extracted to \"{}\" ({} bytes)",
-            //         i,
-            //         output_path.display(),
-            //         file.size()
-            //     );
-            //     if let Some(p) = output_path.parent() {
-            //         if !p.exists() {
-            //             std::fs::create_dir_all(&p).unwrap();
-            //         }
-            //     }
-            //
-            // }
+            if (&*file.name()).ends_with('/') {
+                println!("File {} extracted to \"{}\"", i, output_path.display());
+                std::fs::create_dir_all(&output_path).unwrap();
+            } else {
+                println!(
+                    "File {} extracted to \"{}\" ({} bytes)",
+                    i,
+                    output_path.display(),
+                    file.size()
+                );
+                if let Some(p) = output_path.parent() {
+                    if !p.exists() {
+                        std::fs::create_dir_all(&p).unwrap();
+                    }
+                }
+            }
         }
 
         Ok(())
