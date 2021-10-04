@@ -1,6 +1,12 @@
-use std::fs::File;
+// use std::fmt::format;
+
+use std::fs::{set_permissions, File, Permissions};
 use std::io::copy;
-use tempfile::Builder;
+use std::os::unix::prelude::PermissionsExt;
+use std::path::Path;
+
+// use tempfile::Builder;
+
 use zip::ZipArchive;
 
 use serde::{Deserialize, Serialize};
@@ -43,29 +49,33 @@ impl FontHandler {
         );
         let response = reqwest::get(format!("{}", font.browser_download_url)).await?;
 
-        let temp_dir = Builder::new().prefix("fonts").tempdir()?;
+        // let temp_dir = Builder::new().prefix("fonts").tempdir()?;
 
-        let mut destination = {
-            let file_name = temp_dir.path().join(&font.name);
-            println!("Installing to {:?}", file_name);
-            File::create(file_name)?
-        };
+        let file_output_path = format!("~/fonts/{}", font.name);
+
+        println!("file_output_path {}", file_output_path);
+
+        let file_name = Path::new(&file_output_path);
+
+        let mut destination = { File::create(&file_name)? };
 
         let content = response.text().await?;
+
         copy(&mut content.as_bytes(), &mut destination)?;
 
-        println!("Destination {:?}", destination);
+        println!("File name {:?}", file_name);
 
-        let mut archive = ZipArchive::new(destination).unwrap();
+        let zip_file = File::open(file_name).unwrap();
+
+        let mut archive = ZipArchive::new(zip_file).unwrap();
 
         for i in 0..archive.len() {
-            let file = archive.by_index(i).unwrap();
+            let mut file = archive.by_index(i).unwrap();
+
             let output_path = match file.enclosed_name() {
                 Some(path) => path.to_owned(),
                 None => continue,
             };
-
-            println!("{:?}", output_path);
 
             println!("{}", file.name());
 
