@@ -53,17 +53,16 @@ impl FontHandler {
 
         let file_output_path = format!("~/fonts/{}", font.name);
 
-        println!("file_output_path {}", file_output_path);
-
         let file_name = Path::new(&file_output_path);
 
-        let mut destination = { File::create(&file_name)? };
+        println!("file_output_path {}", file_output_path);
+        println!("File_name {:?}", file_name);
+
+        let mut destination = File::create(&file_output_path)?;
 
         let content = response.text().await?;
 
         copy(&mut content.as_bytes(), &mut destination)?;
-
-        println!("File name {:?}", file_name);
 
         let zip_file = File::open(file_name).unwrap();
 
